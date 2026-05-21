@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>保障卡編輯器</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: #f3f6fb;
+      color: #172033;
+    }
+    .toolbar {
+      max-width: 1120px;
+      margin: 20px auto 12px;
+      padding: 14px 18px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(15, 35, 80, 0.08);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .toolbar strong { margin-right: auto; font-size: 20px; }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      background: #0b3b78;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button.secondary { background: #64748b; }
+    button.danger { background: #d64545; }
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto 32px;
+      padding: 0 20px;
+    }
+    .card {
+      width: 100%;
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px rgba(15, 35, 80, 0.08);
+    }
+    .card-title {
+      background: #073c78;
+      color: white;
+      text-align: center;
+      padding: 12px;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      outline: none;
+    }
+    .card-subtitle {
+      padding: 10px 26px 2px;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.5;
+      min-height: 28px;
+      resize: vertical;
+      overflow: auto;
+      outline: none;
+      white-space: pre-wrap;
+      border-bottom: 1px dashed #d7deea;
+    }
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      gap: 14px;
+      padding: 14px 18px 18px;
+    }
+    .stack { display: flex; flex-direction: column; gap: 14px; }
+    .section {
+      border: 1px solid #dfe7f2;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .section-title {
+      background: #edf3fb;
+      color: #0b4fa2;
+      padding: 8px 14px;
+      font-size: 17px;
+      font-weight: 900;
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .icon {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 26px;
+      color: currentColor;
+    }
+    .section-title-text { outline: none; }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto 84px;
+      align-items: center;
+      min-height: 40px;
+      border-top: 1px solid #dfe7f2;
+      padding: 0 10px 0 16px;
+      gap: 12px;
+    }
+    .name {
+      font-size: 14px;
+      font-weight: 700;
+      outline: none;
+    }
+    .value {
+      font-size: 17px;
+      font-weight: 900;
+      color: #f26b1d;
+      white-space: nowrap;
+      outline: none;
+      text-align: right;
+      min-width: 120px;
+    }
+    .value.green { color: #2e8b57; }
+    .value.blue { color: #0b60c7; }
+    .value.purple { color: #5b3fd1; }
+    .row-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.25;
+      transition: 0.15s;
+    }
+    .row:hover .row-actions { opacity: 1; }
+    .delete-row {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      padding: 0;
+      background: #e2e8f0;
+      color: #475569;
+      font-size: 15px;
+      line-height: 26px;
+    }
+    input[type="color"] {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    .section-tools {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      border-top: 1px solid #dfe7f2;
+      background: #fafcff;
+      flex-wrap: wrap;
+    }
+    .section-tools button {
+      padding: 6px 8px;
+      font-size: 11px;
+      background: #e8eef8;
+      color: #0b3b78;
+    }
+    .note {
+      color: #777;
+      font-size: 13px;
+      padding: 0 20px 16px;
+      outline: none;
+    }
+    [contenteditable="true"]:focus {
+      box-shadow: inset 0 0 0 2px #f59e0b;
+      border-radius: 6px;
+    }
+    .tip {
+      color: #64748b;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    @media print {
+      body { background: white; }
+      .toolbar { display: none; }
+      .wrap { max-width: none; margin: 0; padding: 0; }
+      .card { box-shadow: none; border: 0; border-radius: 0; }
+      .row { grid-template-columns: 1fr auto; padding-right: 16px; }
+      .row-actions, .section-tools { display: none; }
+      [contenteditable="true"]:focus { box-shadow: none; }
+    }
+    @media (max-width: 900px) {
+      .content { grid-template-columns: 1fr; }
+      .toolbar strong { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <strong>保障卡編輯器</strong>
+    <span class="tip">直接點文字修改，點色塊可改金額顏色</span>
+    <button onclick="addSection('leftStack')">左側新增區塊</button>
+    <button onclick="addSection('rightStack')">右側新增區塊</button>
+    <button class="secondary" onclick="saveProject()">儲存專案</button>
+    <button class="secondary" onclick="loadProject()">讀取專案</button>
+    <button class="secondary" onclick="downloadProject()">下載專案檔</button>
+    <button class="secondary" onclick="openPreview()">預覽模式</button>
+    <button class="secondary" onclick="savePNG()">儲存 PNG</button>
+    <button class="danger" onclick="resetDemo()">還原範例</button>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="card-title" contenteditable="true">保障卡</div>
+      <div class="card-subtitle" contenteditable="true" style="height:60px;">
+        點擊這裡輸入補充說明、客戶名稱、規劃重點、備註內容...
+      </div>
+      <div class="content">
+        <div class="stack" id="leftStack">
+          <div class="section">
+            <div class="section-title" style="color:#0b4fa2">
+              <span class="icon">👤</span>
+              <span class="section-title-text" contenteditable="true">人身保障</span>
+            </div>
+            <div class="row"><div class="name" contenteditable="true">壽險</div><div class="value" contenteditable="true">307萬</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">意外身故</div><div class="value" contenteditable="true">568萬</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">癌症身故</div><div class="value" contenteditable="true">427萬</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="section-tools">
+              <button onclick="addRow(this, '#f26b1d')">新增橘色列</button>
+              <button onclick="addRow(this, '#2e8b57')">新增綠色列</button>
+              <button onclick="addRow(this, '#0b60c7')">新增藍色列</button>
+              <button onclick="addRow(this, '#5b3fd1')">新增紫色列</button>
+              <button onclick="changeIcon(this)">更換圖示</button>
+              <button onclick="deleteSection(this)">刪除區塊</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title" style="color:#5b3fd1">
+              <span class="icon">💜</span>
+              <span class="section-title-text" contenteditable="true">長照與收入</span>
+            </div>
+            <div class="row"><div class="name" contenteditable="true">長期照顧</div><div class="value" style="color:#5b3fd1" contenteditable="true">36萬/年</div><div class="row-actions"><input type="color" value="#5b3fd1" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">薪資補償</div><div class="value" style="color:#5b3fd1" contenteditable="true">3萬/月</div><div class="row-actions"><input type="color" value="#5b3fd1" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="section-tools">
+              <button onclick="addRow(this, '#f26b1d')">新增橘色列</button>
+              <button onclick="addRow(this, '#2e8b57')">新增綠色列</button>
+              <button onclick="addRow(this, '#0b60c7')">新增藍色列</button>
+              <button onclick="addRow(this, '#5b3fd1')">新增紫色列</button>
+              <button onclick="changeIcon(this)">更換圖示</button>
+              <button onclick="deleteSection(this)">刪除區塊</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack" id="rightStack">
+          <div class="section">
+            <div class="section-title" style="color:#0b4fa2">
+              <span class="icon">🛡️</span>
+              <span class="section-title-text" contenteditable="true">醫療保障</span>
+            </div>
+            <div class="row"><div class="name" contenteditable="true">住院手術</div><div class="value" contenteditable="true">5萬4~27萬</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">門診手術</div><div class="value" contenteditable="true">7千~16萬3</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">一般病房</div><div class="value" contenteditable="true">9500元/最高</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">住院收據</div><div class="value" contenteditable="true">34萬/最高</div><div class="row-actions"><input type="color" value="#f26b1d" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">意外病房</div><div class="value" style="color:#2e8b57" contenteditable="true">11000元/最高</div><div class="row-actions"><input type="color" value="#2e8b57" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">骨折脫臼</div><div class="value" style="color:#2e8b57" contenteditable="true">48萬/最高</div><div class="row-actions"><input type="color" value="#2e8b57" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">意外收據</div><div class="value" style="color:#2e8b57" contenteditable="true">6萬/最高</div><div class="row-actions"><input type="color" value="#2e8b57" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="row"><div class="name" contenteditable="true">防癌險/一次金</div><div class="value" style="color:#0b60c7" contenteditable="true">4單位/500萬</div><div class="row-actions"><input type="color" value="#0b60c7" oninput="setRowColor(this)"><button class="delete-row" onclick="deleteRow(this)">×</button></div></div>
+            <div class="section-tools">
+              <button onclick="addRow(this, '#f26b1d')">新增橘色列</button>
+              <button onclick="addRow(this, '#2e8b57')">新增綠色列</button>
+              <button onclick="addRow(this, '#0b60c7')">新增藍色列</button>
+              <button onclick="addRow(this, '#5b3fd1')">新增紫色列</button>
+              <button onclick="changeIcon(this)">更換圖示</button>
+              <button onclick="deleteSection(this)">刪除區塊</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note" contenteditable="true">※ 本表僅供參考，實際內容依保單條款為準。</div>
+    </div>
+  </div>
+
+  <script>
+    const icons = ['👤','🛡️','💜','🏥','💼','➕','⭐','📄','💰','🚑'];
+
+    function setRowColor(input) {
+      const row = input.closest('.row');
+      const value = row.querySelector('.value');
+      value.style.color = input.value;
+      value.classList.remove('green', 'blue', 'purple');
+    }
+
+    function addRow(button, color) {
+      const tools = button.closest('.section-tools');
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="name" contenteditable="true">新項目</div>
+        <div class="value" style="color:${color}" contenteditable="true">金額</div>
+        <div class="row-actions">
+          <input type="color" value="${color}" oninput="setRowColor(this)">
+          <button class="delete-row" onclick="deleteRow(this)">×</button>
+        </div>
+      `;
+      tools.before(row);
+    }
+
+    function deleteRow(button) {
+      button.closest('.row').remove();
+    }
+
+    function addSection(stackId) {
+      const stack = document.getElementById(stackId);
+      const section = document.createElement('div');
+      section.className = 'section';
+      section.innerHTML = `
+        <div class="section-title" style="color:#0b4fa2">
+          <span class="icon">⭐</span>
+          <span class="section-title-text" contenteditable="true">新區塊</span>
+        </div>
+        <div class="row">
+          <div class="name" contenteditable="true">新項目</div>
+          <div class="value" style="color:#f26b1d" contenteditable="true">金額</div>
+          <div class="row-actions">
+            <input type="color" value="#f26b1d" oninput="setRowColor(this)">
+            <button class="delete-row" onclick="deleteRow(this)">×</button>
+          </div>
+        </div>
+        <div class="section-tools">
+          <button onclick="addRow(this, '#f26b1d')">新增橘色列</button>
+          <button onclick="addRow(this, '#2e8b57')">新增綠色列</button>
+          <button onclick="addRow(this, '#0b60c7')">新增藍色列</button>
+          <button onclick="addRow(this, '#5b3fd1')">新增紫色列</button>
+          <button onclick="changeIcon(this)">更換圖示</button>
+          <button onclick="deleteSection(this)">刪除區塊</button>
+        </div>
+      `;
+      stack.appendChild(section);
+    }
+
+    function changeIcon(button) {
+      const section = button.closest('.section');
+      const icon = section.querySelector('.icon');
+      const currentIndex = icons.indexOf(icon.textContent.trim());
+      const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % icons.length;
+      icon.textContent = icons[nextIndex];
+    }
+
+    function deleteSection(button) {
+      button.closest('.section').remove();
+    }
+
+    function resetDemo() {
+      location.reload();
+    }
+
+    function saveProject() {
+      const data = document.querySelector('.card').innerHTML;
+      localStorage.setItem('insuranceCardProject', data);
+      alert('專案已儲存在這個瀏覽器。');
+    }
+
+    function loadProject() {
+      const data = localStorage.getItem('insuranceCardProject');
+      if (!data) {
+        alert('目前沒有已儲存的專案。');
+        return;
+      }
+      document.querySelector('.card').innerHTML = data;
+      alert('專案已讀取。');
+    }
+
+    function downloadProject() {
+      const data = {
+        version: '1.0',
+        savedAt: new Date().toISOString(),
+        html: document.querySelector('.card').innerHTML
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '保障卡專案.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+  <div id="previewModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); z-index:9999; padding:30px; overflow:auto;">
+    <div style="max-width:1200px; margin:auto; position:relative;">
+      <button onclick="closePreview()" style="position:absolute; top:-12px; right:-12px; width:42px; height:42px; border-radius:50%; background:#fff; color:#111; font-size:20px; font-weight:bold;">×</button>
+      <div id="previewContent" style="background:white; border-radius:18px; padding:24px;"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    function getCleanCard() {
+      const card = document.querySelector('.card').cloneNode(true);
+
+      card.querySelectorAll('.row-actions').forEach(el => el.remove());
+      card.querySelectorAll('.section-tools').forEach(el => el.remove());
+      card.querySelectorAll('[contenteditable]').forEach(el => {
+        el.removeAttribute('contenteditable');
+        el.style.boxShadow = 'none';
+        el.style.outline = 'none';
+      });
+
+      const subtitle = card.querySelector('.card-subtitle');
+      if (subtitle) {
+        subtitle.style.resize = 'none';
+        subtitle.style.overflow = 'visible';
+        subtitle.style.borderBottom = '0';
+      }
+
+      card.style.boxShadow = 'none';
+      card.style.border = '0';
+      card.style.maxWidth = '100%';
+      card.style.width = '100%';
+
+      return card;
+    }
+
+    function openPreview() {
+      const card = getCleanCard();
+      const preview = document.getElementById('previewContent');
+      preview.innerHTML = '';
+      preview.appendChild(card);
+      document.getElementById('previewModal').style.display = 'block';
+    }
+
+    function closePreview() {
+      document.getElementById('previewModal').style.display = 'none';
+    }
+
+    async function savePNG() {
+      const card = getCleanCard();
+      const temp = document.createElement('div');
+      temp.style.position = 'fixed';
+      temp.style.left = '-99999px';
+      temp.style.top = '0';
+      temp.style.width = '1000px';
+      temp.style.background = '#ffffff';
+      temp.style.padding = '0';
+      temp.appendChild(card);
+      document.body.appendChild(temp);
+
+      try {
+        if (typeof html2canvas === 'undefined') {
+          throw new Error('html2canvas not loaded');
+        }
+
+        const canvas = await html2canvas(card, {
+          scale: 3,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false
+        });
+
+        canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = '保障卡.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 'image/png');
+      } catch (err) {
+        alert('PNG 下載失敗，請確認網路可載入 html2canvas，或改用瀏覽器截圖。');
+      } finally {
+        document.body.removeChild(temp);
+      }
+    }
+  </script>
+</body>
+</html>
