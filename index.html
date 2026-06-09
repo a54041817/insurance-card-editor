@@ -189,56 +189,59 @@
       background: white;
       box-shadow: 0 18px 60px rgba(15, 35, 80, 0.16);
       grid-template-columns: repeat(2, 90mm);
-      grid-auto-rows: auto;
+      grid-auto-rows: 54mm;
       gap: 10mm;
       align-content: start;
-      align-items: start;
       justify-content: center;
     }
     .pdf-card {
       width: 90mm !important;
-      height: auto !important;
+      height: 54mm !important;
       min-height: 0;
       max-width: none !important;
-      overflow: visible;
+      overflow: hidden;
       border: 0.3mm solid #d6deec !important;
       border-radius: 2mm !important;
       box-shadow: none !important;
       background: white;
+      --pdf-scale: 1;
+    }
+    .pdf-card-inner {
+      width: 100%;
     }
     .pdf-card .card-title {
-      height: 10mm;
+      height: calc(10mm * var(--pdf-scale));
       padding: 0 2mm;
-      font-size: 14pt;
-      line-height: 10mm;
+      font-size: calc(14pt * var(--pdf-scale));
+      line-height: calc(10mm * var(--pdf-scale));
       letter-spacing: 1px;
     }
     .pdf-card .content {
       grid-template-columns: 1fr 1.05fr;
-      gap: 1.2mm;
-      padding: 0.9mm 2mm 0.8mm;
+      gap: calc(1.2mm * var(--pdf-scale));
+      padding: calc(0.9mm * var(--pdf-scale)) 2mm calc(0.8mm * var(--pdf-scale));
     }
-    .pdf-card .stack { gap: 1mm; }
+    .pdf-card .stack { gap: calc(1mm * var(--pdf-scale)); }
     .pdf-card .section { border-radius: 1.2mm; }
     .pdf-card .section-title {
-      padding: 1.1mm 1.4mm;
-      font-size: 9pt;
-      gap: 0.8mm;
+      padding: calc(0.65mm * var(--pdf-scale)) 1.4mm;
+      font-size: calc(9pt * var(--pdf-scale));
+      gap: calc(0.8mm * var(--pdf-scale));
     }
     .pdf-card .icon {
-      width: 5.6mm;
-      height: 5.6mm;
-      flex-basis: 5.6mm;
-      font-size: 9pt;
+      width: calc(5.6mm * var(--pdf-scale));
+      height: calc(5.6mm * var(--pdf-scale));
+      flex-basis: calc(5.6mm * var(--pdf-scale));
+      font-size: calc(9pt * var(--pdf-scale));
     }
     .pdf-card .row {
       grid-template-columns: 1fr auto;
-      min-height: 7mm;
+      min-height: calc(7mm * var(--pdf-scale));
       padding: 0 1.4mm;
-      gap: 1.2mm;
+      gap: calc(1.2mm * var(--pdf-scale));
     }
     .pdf-card .name {
-      font-size: 8.5pt;
+      font-size: calc(8.5pt * var(--pdf-scale));
       line-height: 1;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -246,12 +249,12 @@
     }
     .pdf-card .value {
       min-width: 0;
-      font-size: 9.5pt;
+      font-size: calc(9.5pt * var(--pdf-scale));
       line-height: 1;
     }
     .pdf-card .note {
-      padding: 0 2.2mm 0.8mm;
-      font-size: 7pt;
+      padding: 0 2.2mm calc(0.8mm * var(--pdf-scale));
+      font-size: calc(7pt * var(--pdf-scale));
       line-height: 1.2;
       max-height: none;
       overflow: visible;
@@ -303,7 +306,7 @@
       }
       .pdf-mode .pdf-card {
         width: 90mm !important;
-        height: auto !important;
+        height: 54mm !important;
         min-height: 0;
         border: 0.3mm solid #d6deec !important;
         border-radius: 2mm !important;
@@ -557,9 +560,38 @@
     }
 
     function getPdfCard() {
+      const frame = document.createElement('div');
       const card = getCleanCard();
-      card.classList.add('pdf-card');
-      return card;
+      frame.className = 'pdf-card';
+      card.classList.add('pdf-card-inner');
+      frame.appendChild(card);
+      return frame;
+    }
+
+    function fitPdfCards() {
+      document.querySelectorAll('.pdf-card').forEach(frame => {
+        const inner = frame.querySelector('.pdf-card-inner');
+        if (!inner) return;
+
+        const frameHeight = frame.clientHeight;
+        let low = 0.6;
+        let high = 2;
+
+        frame.style.setProperty('--pdf-scale', high);
+        if (inner.scrollHeight <= frameHeight) return;
+
+        for (let i = 0; i < 12; i += 1) {
+          const mid = (low + high) / 2;
+          frame.style.setProperty('--pdf-scale', mid);
+          if (inner.scrollHeight <= frameHeight) {
+            low = mid;
+          } else {
+            high = mid;
+          }
+        }
+
+        frame.style.setProperty('--pdf-scale', low);
+      });
     }
 
     function buildPdfSheet() {
@@ -573,7 +605,10 @@
     function showPdfPreview() {
       buildPdfSheet();
       document.body.classList.add('pdf-mode');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        fitPdfCards();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
 
     function closePdfPreview() {
@@ -583,7 +618,10 @@
     function printPdf() {
       buildPdfSheet();
       document.body.classList.add('pdf-mode');
-      requestAnimationFrame(() => window.print());
+      requestAnimationFrame(() => {
+        fitPdfCards();
+        requestAnimationFrame(() => window.print());
+      });
     }
 
     window.addEventListener('afterprint', closePdfPreview);
