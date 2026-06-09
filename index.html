@@ -59,20 +59,6 @@
       letter-spacing: 2px;
       outline: none;
     }
-    .card-subtitle {
-      height: 32px;
-      padding: 6px 26px;
-      color: #64748b;
-      font-size: 12px;
-      line-height: 20px;
-      min-height: 0;
-      resize: none;
-      overflow: hidden;
-      outline: none;
-      white-space: nowrap;
-      text-align: right;
-      border-bottom: 1px dashed #d7deea;
-    }
     .content {
       display: grid;
       grid-template-columns: 1fr 1.05fr;
@@ -221,19 +207,11 @@
       background: white;
     }
     .pdf-card .card-title {
-      padding: 1mm 2mm;
-      font-size: 10pt;
+      height: 10mm;
+      padding: 0 2mm;
+      font-size: 14pt;
+      line-height: 10mm;
       letter-spacing: 1px;
-    }
-    .pdf-card .card-subtitle {
-      height: 4mm !important;
-      min-height: 0;
-      max-height: 4mm;
-      padding: 0.6mm 3mm 0;
-      font-size: 4.8pt;
-      line-height: 1.1;
-      resize: none;
-      overflow: hidden;
     }
     .pdf-card .content {
       grid-template-columns: 1fr 1.05fr;
@@ -243,37 +221,37 @@
     .pdf-card .stack { gap: 1mm; }
     .pdf-card .section { border-radius: 1.2mm; }
     .pdf-card .section-title {
-      padding: 0.9mm 1.2mm;
-      font-size: 6.2pt;
+      padding: 1.1mm 1.4mm;
+      font-size: 9pt;
       gap: 0.8mm;
     }
     .pdf-card .icon {
-      width: 4mm;
-      height: 4mm;
-      flex-basis: 4mm;
-      font-size: 6.2pt;
+      width: 5.6mm;
+      height: 5.6mm;
+      flex-basis: 5.6mm;
+      font-size: 9pt;
     }
     .pdf-card .row {
       grid-template-columns: 1fr auto;
-      min-height: 4.4mm;
-      padding: 0 1.2mm;
+      min-height: 7mm;
+      padding: 0 1.4mm;
       gap: 1.2mm;
     }
     .pdf-card .name {
-      font-size: 5.2pt;
-      line-height: 1.1;
+      font-size: 8.5pt;
+      line-height: 1;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     .pdf-card .value {
       min-width: 0;
-      font-size: 6pt;
+      font-size: 9.5pt;
       line-height: 1;
     }
     .pdf-card .note {
       padding: 0 2.2mm 0.8mm;
-      font-size: 4.8pt;
+      font-size: 7pt;
       line-height: 1.2;
       max-height: none;
       overflow: visible;
@@ -356,9 +334,6 @@
   <div class="wrap">
     <div class="card">
       <div class="card-title" contenteditable="true">保障卡</div>
-      <div class="card-subtitle" contenteditable="true">
-        點擊這裡輸入補充說明、客戶名稱、規劃重點、備註內容...
-      </div>
       <div class="content">
         <div class="stack" id="leftStack">
           <div class="section">
@@ -560,14 +535,6 @@
         el.style.boxShadow = 'none';
         el.style.outline = 'none';
       });
-
-      const subtitle = card.querySelector('.card-subtitle');
-      if (subtitle) {
-        subtitle.style.height = '32px';
-        subtitle.style.resize = 'none';
-        subtitle.style.overflow = 'hidden';
-        subtitle.style.borderBottom = '0';
-      }
 
       card.style.boxShadow = 'none';
       card.style.border = '0';
