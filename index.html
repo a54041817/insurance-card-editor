@@ -60,15 +60,16 @@
       outline: none;
     }
     .card-subtitle {
-      padding: 10px 26px 2px;
+      height: 32px;
+      padding: 6px 26px;
       color: #64748b;
       font-size: 12px;
-      line-height: 1.5;
-      min-height: 28px;
-      resize: vertical;
-      overflow: auto;
+      line-height: 20px;
+      min-height: 0;
+      resize: none;
+      overflow: hidden;
       outline: none;
-      white-space: pre-wrap;
+      white-space: nowrap;
       border-bottom: 1px dashed #d7deea;
     }
     .content {
@@ -184,14 +185,147 @@
       font-size: 13px;
       margin-left: 8px;
     }
+    .pdf-actions {
+      display: none;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 12px 0;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .pdf-sheet {
+      display: none;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 24px auto;
+      padding: 8mm;
+      background: white;
+      box-shadow: 0 18px 60px rgba(15, 35, 80, 0.16);
+      grid-template-columns: repeat(2, 90mm);
+      grid-auto-rows: 50mm;
+      gap: 10mm;
+      align-content: start;
+      justify-content: center;
+    }
+    .pdf-card {
+      width: 90mm !important;
+      height: 50mm !important;
+      max-width: none !important;
+      overflow: hidden;
+      border: 0.3mm solid #d6deec !important;
+      border-radius: 2mm !important;
+      box-shadow: none !important;
+      background: white;
+    }
+    .pdf-card .card-title {
+      padding: 0.8mm 2mm;
+      font-size: 8pt;
+      letter-spacing: 1px;
+    }
+    .pdf-card .card-subtitle {
+      height: 4mm !important;
+      min-height: 0;
+      max-height: 4mm;
+      padding: 0.6mm 3mm 0;
+      font-size: 3.8pt;
+      line-height: 1.1;
+      resize: none;
+      overflow: hidden;
+    }
+    .pdf-card .content {
+      grid-template-columns: 1fr 1.05fr;
+      gap: 1.2mm;
+      padding: 0.9mm 2mm 0.8mm;
+    }
+    .pdf-card .stack { gap: 1mm; }
+    .pdf-card .section { border-radius: 1.2mm; }
+    .pdf-card .section-title {
+      padding: 0.75mm 1.2mm;
+      font-size: 5pt;
+      gap: 0.8mm;
+    }
+    .pdf-card .icon {
+      width: 3.4mm;
+      height: 3.4mm;
+      flex-basis: 3.4mm;
+      font-size: 5pt;
+    }
+    .pdf-card .row {
+      grid-template-columns: 1fr auto;
+      min-height: 3.85mm;
+      padding: 0 1.2mm;
+      gap: 1.2mm;
+    }
+    .pdf-card .name {
+      font-size: 4.2pt;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pdf-card .value {
+      min-width: 0;
+      font-size: 4.9pt;
+      line-height: 1;
+    }
+    .pdf-card .note {
+      padding: 0 2.2mm 0.8mm;
+      font-size: 3.8pt;
+      line-height: 1.2;
+      max-height: 4mm;
+      overflow: hidden;
+    }
+    .pdf-card .row-actions,
+    .pdf-card .section-tools {
+      display: none;
+    }
+    .pdf-mode .toolbar,
+    .pdf-mode .wrap {
+      display: none;
+    }
+    .pdf-mode .pdf-actions {
+      display: flex;
+    }
+    .pdf-mode .pdf-sheet {
+      display: grid;
+    }
+    @page {
+      size: A4;
+      margin: 0;
+    }
     @media print {
-      body { background: white; }
+      body {
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
       .toolbar { display: none; }
       .wrap { max-width: none; margin: 0; padding: 0; }
       .card { box-shadow: none; border: 0; border-radius: 0; }
       .row { grid-template-columns: 1fr auto; padding-right: 16px; }
       .row-actions, .section-tools { display: none; }
       [contenteditable="true"]:focus { box-shadow: none; }
+      .pdf-mode .toolbar,
+      .pdf-mode .wrap,
+      .pdf-mode .pdf-actions {
+        display: none !important;
+      }
+      .pdf-mode .pdf-sheet {
+        display: grid !important;
+        width: 210mm;
+        height: 297mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 8mm;
+        box-shadow: none;
+        page-break-after: always;
+      }
+      .pdf-mode .pdf-card {
+        width: 90mm !important;
+        height: 50mm !important;
+        border: 0.3mm solid #d6deec !important;
+        border-radius: 2mm !important;
+      }
     }
     @media (max-width: 900px) {
       .content { grid-template-columns: 1fr; }
@@ -210,13 +344,15 @@
     <button class="secondary" onclick="downloadProject()">下載專案檔</button>
     <button class="secondary" onclick="openPreview()">預覽模式</button>
     <button class="secondary" onclick="savePNG()">儲存 PNG</button>
+    <button class="secondary" onclick="showPdfPreview()">預覽 A4 PDF</button>
+    <button class="secondary" onclick="printPdf()">輸出 PDF</button>
     <button class="danger" onclick="resetDemo()">還原範例</button>
   </div>
 
   <div class="wrap">
     <div class="card">
       <div class="card-title" contenteditable="true">保障卡</div>
-      <div class="card-subtitle" contenteditable="true" style="height:60px;">
+      <div class="card-subtitle" contenteditable="true">
         點擊這裡輸入補充說明、客戶名稱、規劃重點、備註內容...
       </div>
       <div class="content">
@@ -285,6 +421,12 @@
       <div class="note" contenteditable="true">※ 本表僅供參考，實際內容依保單條款為準。</div>
     </div>
   </div>
+
+  <div class="pdf-actions">
+    <button class="secondary" onclick="closePdfPreview()">返回編輯</button>
+    <button class="secondary" onclick="printPdf()">輸出 PDF</button>
+  </div>
+  <div class="pdf-sheet" id="pdfSheet" aria-label="A4 PDF 預覽"></div>
 
   <script>
     const icons = ['👤','🛡️','💜','🏥','💼','➕','⭐','📄','💰','🚑'];
@@ -417,8 +559,9 @@
 
       const subtitle = card.querySelector('.card-subtitle');
       if (subtitle) {
+        subtitle.style.height = '32px';
         subtitle.style.resize = 'none';
-        subtitle.style.overflow = 'visible';
+        subtitle.style.overflow = 'hidden';
         subtitle.style.borderBottom = '0';
       }
 
@@ -441,6 +584,44 @@
     function closePreview() {
       document.getElementById('previewModal').style.display = 'none';
     }
+
+    function getPdfCard() {
+      const card = getCleanCard();
+      card.classList.add('pdf-card');
+      return card;
+    }
+
+    function buildPdfSheet() {
+      const sheet = document.getElementById('pdfSheet');
+      sheet.innerHTML = '';
+      for (let i = 0; i < 4; i += 1) {
+        sheet.appendChild(getPdfCard());
+      }
+    }
+
+    function showPdfPreview() {
+      buildPdfSheet();
+      document.body.classList.add('pdf-mode');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closePdfPreview() {
+      document.body.classList.remove('pdf-mode');
+    }
+
+    function printPdf() {
+      buildPdfSheet();
+      document.body.classList.add('pdf-mode');
+      requestAnimationFrame(() => window.print());
+    }
+
+    window.addEventListener('afterprint', closePdfPreview);
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') {
+        closePdfPreview();
+      }
+    });
 
     async function savePNG() {
       const card = getCleanCard();
